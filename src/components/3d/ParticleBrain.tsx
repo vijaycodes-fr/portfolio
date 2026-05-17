@@ -3,12 +3,8 @@ import { useRef, useMemo, useEffect } from 'react';
 import { useFrame } from '@react-three/fiber';
 import * as THREE from 'three';
 import {
-  getSpherePositions,
-  getHelixPositions,
-  getTorusKnotPositions,
-  getLetterPositions,
-  getExplodePositions,
-  getVortexPositions,
+  getSpherePositions, getHelixPositions, getTorusKnotPositions,
+  getLetterPositions, getExplodePositions, getVortexPositions,
 } from '@/lib/particlePositions';
 import { SCROLL_PHASES } from '@/lib/constants';
 
@@ -22,29 +18,27 @@ function easeInOut(t: number): number {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
-const MAX_LINES = 500;
-// Sample every Nth particle for line connections — keeps the nested loop cheap
-const LINE_STEP_DESKTOP = 12;
-const LINE_STEP_MOBILE = 20;
-// Only recompute lines every N frames
-const LINE_FRAME_SKIP = 4;
+const MAX_LINES = 350;
+const LINE_STEP_DESKTOP = 15;
+const LINE_STEP_MOBILE = 25;
+const LINE_FRAME_SKIP = 5;
 
 export default function ParticleBrain({ scrollRef, mouseRef, isMobile }: Props) {
-  const count = isMobile ? 600 : 1500;
+  const count = isMobile ? 500 : 1200;
   const groupRef = useRef<THREE.Group>(null);
   const frameRef = useRef(0);
 
-  const cyan = useMemo(() => new THREE.Color('#00d4ff'), []);
+  const cyan  = useMemo(() => new THREE.Color('#00d4ff'), []);
   const purple = useMemo(() => new THREE.Color('#7c3aed'), []);
   const colorWork = useMemo(() => new THREE.Color(), []);
 
   const targets = useMemo(() => ({
-    sphere: getSpherePositions(count),
+    sphere:  getSpherePositions(count),
     explode: getExplodePositions(count),
-    helix: getHelixPositions(count),
-    torus: getTorusKnotPositions(count),
+    helix:   getHelixPositions(count),
+    torus:   getTorusKnotPositions(count),
     letters: getLetterPositions(count),
-    vortex: getVortexPositions(count),
+    vortex:  getVortexPositions(count),
   }), [count]);
 
   const currentPositions = useRef(new Float32Array(targets.sphere));
@@ -65,11 +59,12 @@ export default function ParticleBrain({ scrollRef, mouseRef, isMobile }: Props) 
     return geo;
   }, []);
 
+  // Slightly larger particles to compensate for no bloom — still glowing via AdditiveBlending
   const material = useMemo(() => new THREE.PointsMaterial({
-    size: isMobile ? 0.025 : 0.02,
+    size: isMobile ? 0.03 : 0.025,
     color: '#00d4ff',
     transparent: true,
-    opacity: 0.9,
+    opacity: 1,
     sizeAttenuation: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
@@ -78,32 +73,23 @@ export default function ParticleBrain({ scrollRef, mouseRef, isMobile }: Props) 
   const lineMaterial = useMemo(() => new THREE.LineBasicMaterial({
     color: '#00d4ff',
     transparent: true,
-    opacity: 0.15,
+    opacity: 0.18,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
   }), []);
 
-  useEffect(() => {
-    return () => {
-      geometry.dispose();
-      lineGeometry.dispose();
-      material.dispose();
-      lineMaterial.dispose();
-    };
+  useEffect(() => () => {
+    geometry.dispose(); lineGeometry.dispose();
+    material.dispose(); lineMaterial.dispose();
   }, [geometry, lineGeometry, material, lineMaterial]);
 
   useFrame((_, delta) => {
     if (!groupRef.current) return;
-
-    // Cap delta to avoid spiral-of-death on tab switch
     const dt = Math.min(delta, 0.05);
     const sp = scrollRef.current;
 
-    // --- Determine morph targets ---
-    let fromPos: Float32Array;
-    let toPos: Float32Array;
-    let localT: number;
-
+    // Determine morph targets
+    let fromPos: Float32Array, toPos: Float32Array, localT: number;
     if (sp < SCROLL_PHASES.EXPLODE) {
       fromPos = targets.sphere; toPos = targets.sphere; localT = 0;
     } else if (sp < SCROLL_PHASES.HELIX) {
@@ -123,18 +109,17 @@ export default function ParticleBrain({ scrollRef, mouseRef, isMobile }: Props) 
       localT = easeInOut((sp - SCROLL_PHASES.VORTEX) / (1 - SCROLL_PHASES.VORTEX));
     }
 
-    // --- In-place lerp particles ---
-    const lerpSpeed = Math.min(dt * 7, 1);
+    // In-place lerp
+    const speed = Math.min(dt * 7, 1);
     const pos = currentPositions.current;
     for (let i = 0; i < count * 3; i++) {
-      pos[i] += (fromPos[i] + (toPos[i] - fromPos[i]) * localT - pos[i]) * lerpSpeed;
+      pos[i] += (fromPos[i] + (toPos[i] - fromPos[i]) * localT - pos[i]) * speed;
     }
-
     const posAttr = geometry.getAttribute('position') as THREE.BufferAttribute;
     posAttr.set(pos);
     posAttr.needsUpdate = true;
 
-    // --- Color shift (reuse colorWork, no allocation) ---
+    // Color shift — no allocations
     let colorT = 0;
     if (sp > 0.3 && sp < 0.7) colorT = (sp - 0.3) / 0.4;
     else if (sp >= 0.7) colorT = 1 - (sp - 0.7) / 0.3;
@@ -142,14 +127,14 @@ export default function ParticleBrain({ scrollRef, mouseRef, isMobile }: Props) 
     material.color.copy(colorWork);
     lineMaterial.color.copy(colorWork);
 
-    // --- Line connections: only every LINE_FRAME_SKIP frames ---
+    // Line connections — throttled
     frameRef.current++;
     if (frameRef.current % LINE_FRAME_SKIP === 0) {
       const linePos = lineGeometry.getAttribute('position') as THREE.BufferAttribute;
       const lineArr = linePos.array as Float32Array;
       let lineIdx = 0;
       const step = isMobile ? LINE_STEP_MOBILE : LINE_STEP_DESKTOP;
-      const distSq = 0.64; // 0.8²
+      const distSq = 0.64;
 
       outer: for (let i = 0; i < count; i += step) {
         for (let j = i + step; j < count; j += step) {
@@ -159,12 +144,8 @@ export default function ParticleBrain({ scrollRef, mouseRef, isMobile }: Props) 
           const dz = pos[ix + 2] - pos[jx + 2];
           if (dx * dx + dy * dy + dz * dz < distSq) {
             const li = lineIdx * 6;
-            lineArr[li]     = pos[ix];
-            lineArr[li + 1] = pos[ix + 1];
-            lineArr[li + 2] = pos[ix + 2];
-            lineArr[li + 3] = pos[jx];
-            lineArr[li + 4] = pos[jx + 1];
-            lineArr[li + 5] = pos[jx + 2];
+            lineArr[li]   = pos[ix];   lineArr[li+1] = pos[ix+1]; lineArr[li+2] = pos[ix+2];
+            lineArr[li+3] = pos[jx];   lineArr[li+4] = pos[jx+1]; lineArr[li+5] = pos[jx+2];
             if (++lineIdx >= MAX_LINES) break outer;
           }
         }
@@ -172,13 +153,11 @@ export default function ParticleBrain({ scrollRef, mouseRef, isMobile }: Props) 
       linePos.needsUpdate = true;
     }
 
-    // --- Group rotation + mouse parallax ---
+    // Rotation + mouse parallax
     groupRef.current.rotation.y += dt * 0.15;
     if (!isMobile) {
-      const mx = mouseRef.current.x;
-      const my = mouseRef.current.y;
-      groupRef.current.position.x += (mx * 0.3 - groupRef.current.position.x) * 0.05;
-      groupRef.current.position.y += (my * 0.3 - groupRef.current.position.y) * 0.05;
+      groupRef.current.position.x += (mouseRef.current.x * 0.3 - groupRef.current.position.x) * 0.05;
+      groupRef.current.position.y += (mouseRef.current.y * 0.3 - groupRef.current.position.y) * 0.05;
     }
   });
 

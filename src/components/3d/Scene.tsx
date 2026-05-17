@@ -1,6 +1,6 @@
 'use client';
 import { Suspense, useEffect, useRef, useState } from 'react';
-import { Canvas } from '@react-three/fiber';
+import { Canvas, useThree } from '@react-three/fiber';
 import { AdaptiveDpr } from '@react-three/drei';
 import ParticleBrain from './ParticleBrain';
 
@@ -8,28 +8,26 @@ interface Props {
   scrollRef: React.MutableRefObject<number>;
 }
 
-function BloomWrapper({ children }: { children: React.ReactNode }) {
-  const [Bloom, setBloom] = useState<React.ComponentType<{
-    luminanceThreshold: number; luminanceSmoothing: number; intensity: number;
-  }> | null>(null);
-  const [Composer, setComposer] = useState<React.ComponentType<{ children: React.ReactNode }> | null>(null);
+// Watches scroll changes and asks the renderer to draw a new frame
+function ScrollInvalidator({ scrollRef }: { scrollRef: React.MutableRefObject<number> }) {
+  const { invalidate } = useThree();
+  const lastRef = useRef(0);
 
   useEffect(() => {
-    import('@react-three/postprocessing').then((mod) => {
-      setComposer(() => mod.EffectComposer as React.ComponentType<{ children: React.ReactNode }>);
-      setBloom(() => mod.Bloom as React.ComponentType<{ luminanceThreshold: number; luminanceSmoothing: number; intensity: number }>);
-    }).catch(() => {});
-  }, []);
+    let rafId = 0;
+    const tick = () => {
+      if (scrollRef.current !== lastRef.current) {
+        lastRef.current = scrollRef.current;
+        invalidate();
+      }
+      // Also keep a slow idle render for the rotation animation
+      rafId = requestAnimationFrame(tick);
+    };
+    rafId = requestAnimationFrame(tick);
+    return () => cancelAnimationFrame(rafId);
+  }, [scrollRef, invalidate]);
 
-  if (!Bloom || !Composer) return <>{children}</>;
-  return (
-    <>
-      {children}
-      <Composer>
-        <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.5} intensity={1.2} />
-      </Composer>
-    </>
-  );
+  return null;
 }
 
 export default function Scene({ scrollRef }: Props) {
@@ -58,9 +56,15 @@ export default function Scene({ scrollRef }: Props) {
   return (
     <Canvas
       camera={{ position: [0, 0, 4], fov: 60 }}
-      gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }}
+      gl={{
+        alpha: true,
+        antialias: false,
+        powerPreference: 'high-performance',
+        stencil: false,
+        depth: false,
+      }}
       style={{ background: 'transparent' }}
-      dpr={[1, isMobile ? 1 : 1.5]}
+      dpr={1}
       frameloop="always"
     >
       <AdaptiveDpr pixelated />
@@ -68,13 +72,7 @@ export default function Scene({ scrollRef }: Props) {
       <pointLight position={[-3, 0, 2]} intensity={2} color="#00d4ff" />
       <pointLight position={[3, 0, 2]} intensity={2} color="#7c3aed" />
       <Suspense fallback={null}>
-        {isMobile ? (
-          <ParticleBrain scrollRef={scrollRef} mouseRef={mouseRef} isMobile={true} />
-        ) : (
-          <BloomWrapper>
-            <ParticleBrain scrollRef={scrollRef} mouseRef={mouseRef} isMobile={false} />
-          </BloomWrapper>
-        )}
+        <ParticleBrain scrollRef={scrollRef} mouseRef={mouseRef} isMobile={isMobile} />
       </Suspense>
     </Canvas>
   );
