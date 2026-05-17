@@ -4,7 +4,7 @@ import { motion, useInView } from 'framer-motion';
 
 function Counter({ target, suffix = '' }: { target: number; suffix?: string }) {
   const [value, setValue] = useState(0);
-  const ref = useRef<HTMLSpanElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
   const inView = useInView(ref, { once: true });
 
   useEffect(() => {
@@ -21,73 +21,65 @@ function Counter({ target, suffix = '' }: { target: number; suffix?: string }) {
     requestAnimationFrame(tick);
   }, [inView, target]);
 
-  return <span ref={ref}>{value % 1 === 0 ? value : value.toFixed(1)}{suffix}</span>;
+  return <div ref={ref}>{value % 1 === 0 ? value : value.toFixed(1)}{suffix}</div>;
 }
 
-const orbitItems = ['React', 'Python', 'Three.js', 'AI'];
+const orbitItems = [
+  { label: 'React', cls: 'orbit-0' },
+  { label: 'Python', cls: 'orbit-1' },
+  { label: 'Three.js', cls: 'orbit-2' },
+  { label: 'AI', cls: 'orbit-3' },
+];
 
 export default function About() {
   const ref = useRef(null);
   const inView = useInView(ref, { once: true, amount: 0.2 });
 
   return (
-    <section id="about" ref={ref} className="py-32 px-6 bg-[#0a0a0a]">
-      <div className="max-w-7xl mx-auto">
+    <section id="about" ref={ref} style={{ padding: '8rem 1.5rem', background: '#0a0a0a' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto' }}>
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
+          style={{ marginBottom: '4rem' }}
         >
-          <h2 className="text-5xl font-black text-white mb-4">About <span className="bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] bg-clip-text text-transparent">Me</span></h2>
-          <div className="w-16 h-1 bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] rounded-full mb-16" />
+          <h2 style={{ fontSize: '3rem', fontWeight: 900, color: '#fff', marginBottom: '0.5rem' }}>
+            About <span className="gradient-text">Me</span>
+          </h2>
+          <div style={{ width: '64px', height: '4px', background: 'linear-gradient(to right, #00d4ff, #7c3aed)', borderRadius: '9999px' }} />
         </motion.div>
 
-        <div className="grid md:grid-cols-2 gap-16 items-center">
+        <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '4rem', alignItems: 'center' }}>
           {/* Left — monogram card with orbiting badges */}
           <motion.div
             initial={{ opacity: 0, x: -40 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.2 }}
-            className="relative flex items-center justify-center h-80"
+            style={{ position: 'relative', display: 'flex', alignItems: 'center', justifyContent: 'center', height: '280px' }}
           >
-            <div className="w-48 h-48 rounded-2xl border-2 border-[#00d4ff]/50 bg-[#00d4ff]/5 flex items-center justify-center shadow-[0_0_40px_rgba(0,212,255,0.15)]">
-              <span className="text-5xl font-black bg-gradient-to-br from-[#00d4ff] to-[#7c3aed] bg-clip-text text-transparent">SVA</span>
+            <div className="card-cyan glow-cyan" style={{ width: '160px', height: '160px', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <span className="gradient-text" style={{ fontSize: '3rem', fontWeight: 900 }}>SVA</span>
             </div>
-            {orbitItems.map((item, i) => (
+            {orbitItems.map((item) => (
               <div
-                key={item}
-                className="absolute px-3 py-1 rounded-full bg-[#0a0a0a] border border-[#00d4ff]/40 text-[#00d4ff] text-xs font-medium"
+                key={item.label}
+                className={item.cls}
                 style={{
-                  animation: `orbit${i} ${6 + i}s linear infinite`,
-                  animationDelay: `${-i * 1.5}s`,
+                  position: 'absolute',
+                  padding: '4px 12px',
+                  borderRadius: '9999px',
+                  background: '#0d1a20',
+                  border: '1px solid rgba(0,212,255,0.5)',
+                  color: '#00d4ff',
+                  fontSize: '0.75rem',
+                  fontWeight: 600,
+                  whiteSpace: 'nowrap',
                 }}
               >
-                {item}
+                {item.label}
               </div>
             ))}
-
-            <style jsx>{`
-              @keyframes orbit0 {
-                from { transform: rotate(0deg) translateX(120px) rotate(0deg); }
-                to   { transform: rotate(360deg) translateX(120px) rotate(-360deg); }
-              }
-              @keyframes orbit1 {
-                from { transform: rotate(90deg) translateX(130px) rotate(-90deg); }
-                to   { transform: rotate(450deg) translateX(130px) rotate(-450deg); }
-              }
-              @keyframes orbit2 {
-                from { transform: rotate(180deg) translateX(115px) rotate(-180deg); }
-                to   { transform: rotate(540deg) translateX(115px) rotate(-540deg); }
-              }
-              @keyframes orbit3 {
-                from { transform: rotate(270deg) translateX(125px) rotate(-270deg); }
-                to   { transform: rotate(630deg) translateX(125px) rotate(-630deg); }
-              }
-              [style*="orbit0"] { animation-name: orbit0; }
-              [style*="orbit1"] { animation-name: orbit1; }
-              [style*="orbit2"] { animation-name: orbit2; }
-              [style*="orbit3"] { animation-name: orbit3; }
-            `}</style>
           </motion.div>
 
           {/* Right — bio */}
@@ -95,20 +87,18 @@ export default function About() {
             initial={{ opacity: 0, x: 40 }}
             animate={inView ? { opacity: 1, x: 0 } : {}}
             transition={{ duration: 0.6, delay: 0.3 }}
-            className="space-y-6"
+            style={{ display: 'flex', flexDirection: 'column', gap: '1.5rem' }}
           >
-            <p className="text-[#94a3b8] text-lg leading-relaxed">
+            <p style={{ color: '#94a3b8', fontSize: '1.1rem', lineHeight: '1.8' }}>
               I&apos;m a Full Stack Developer and AI Engineer based in Chennai, India. I specialize in building production-grade AI-powered applications — from LLM pipelines and RAG systems to cloud integrations and scalable APIs.
             </p>
 
-            <div className="p-6 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
-              <div className="flex items-start gap-4">
-                <div className="w-10 h-10 rounded-xl bg-[#00d4ff]/10 flex items-center justify-center text-[#00d4ff] font-bold text-sm shrink-0">CIT</div>
-                <div>
-                  <p className="text-white font-bold">Chennai Institute of Technology</p>
-                  <p className="text-[#94a3b8] text-sm">B.E Computer Science Engineering</p>
-                  <p className="text-[#94a3b8] text-sm">2024 – 2028 &nbsp;·&nbsp; CGPA: 7.5</p>
-                </div>
+            <div className="card" style={{ padding: '1.5rem', display: 'flex', gap: '1rem', alignItems: 'flex-start' }}>
+              <div style={{ width: '44px', height: '44px', borderRadius: '12px', background: 'rgba(0,212,255,0.15)', border: '1px solid rgba(0,212,255,0.3)', display: 'flex', alignItems: 'center', justifyContent: 'center', color: '#00d4ff', fontWeight: 700, fontSize: '0.75rem', flexShrink: 0 }}>CIT</div>
+              <div>
+                <p style={{ color: '#fff', fontWeight: 700, marginBottom: '4px' }}>Chennai Institute of Technology</p>
+                <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>B.E Computer Science Engineering</p>
+                <p style={{ color: '#94a3b8', fontSize: '0.875rem' }}>2024 – 2028 &nbsp;·&nbsp; CGPA: 7.5</p>
               </div>
             </div>
           </motion.div>
@@ -119,7 +109,7 @@ export default function About() {
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6, delay: 0.5 }}
-          className="grid grid-cols-2 md:grid-cols-4 gap-4 mt-16"
+          style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(180px, 1fr))', gap: '1rem', marginTop: '4rem' }}
         >
           {[
             { label: 'Projects', target: 4, suffix: '+' },
@@ -127,11 +117,11 @@ export default function About() {
             { label: 'Hackathon Wins', target: 2, suffix: '' },
             { label: 'CGPA', target: 7.5, suffix: '' },
           ].map((s) => (
-            <div key={s.label} className="p-6 rounded-2xl border border-white/10 bg-white/5 text-center">
-              <div className="text-4xl font-black bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] bg-clip-text text-transparent">
+            <div key={s.label} className="card" style={{ padding: '1.5rem', textAlign: 'center' }}>
+              <div className="gradient-text" style={{ fontSize: '2.5rem', fontWeight: 900, marginBottom: '4px' }}>
                 <Counter target={s.target} suffix={s.suffix} />
               </div>
-              <div className="text-[#94a3b8] text-sm mt-1">{s.label}</div>
+              <div style={{ color: '#94a3b8', fontSize: '0.875rem' }}>{s.label}</div>
             </div>
           ))}
         </motion.div>

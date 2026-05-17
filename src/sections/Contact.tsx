@@ -1,7 +1,6 @@
 'use client';
 import { useRef } from 'react';
 import { motion, useInView } from 'framer-motion';
-import { Mail, Copy } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from '@/components/ui/Icons';
 import toast from 'react-hot-toast';
 
@@ -11,62 +10,36 @@ export default function Contact() {
 
   const copyEmail = () => {
     navigator.clipboard.writeText('vijayrox1955@gmail.com');
-    toast('Copied! 📋', {
-      style: { background: '#1a1a2e', color: '#fff', border: '1px solid rgba(0,212,255,0.3)' },
-    });
+    toast('Copied! 📋', { style: { background: '#111118', color: '#fff', border: '1px solid rgba(0,212,255,0.3)' } });
   };
 
   return (
-    <section id="contact" ref={ref} className="py-32 px-6 bg-[#0a0a0a]">
-      <div className="max-w-4xl mx-auto text-center">
-        <motion.div
-          initial={{ opacity: 0, y: 40 }}
-          animate={inView ? { opacity: 1, y: 0 } : {}}
-          transition={{ duration: 0.6 }}
-          className="space-y-6"
-        >
-          <h2 className="text-5xl md:text-6xl font-black text-white leading-tight">
-            Let&apos;s Build <span className="bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] bg-clip-text text-transparent">Something.</span>
+    <section id="contact" ref={ref} style={{ padding: '8rem 1.5rem', background: '#0a0a0a' }}>
+      <div style={{ maxWidth: '800px', margin: '0 auto', textAlign: 'center' }}>
+        <motion.div initial={{ opacity: 0, y: 40 }} animate={inView ? { opacity: 1, y: 0 } : {}} transition={{ duration: 0.6 }}>
+          <h2 style={{ fontSize: 'clamp(2.5rem,5vw,4rem)', fontWeight: 900, color: '#fff', marginBottom: '1rem', lineHeight: 1.1 }}>
+            Let&apos;s Build <span className="gradient-text">Something.</span>
           </h2>
+          <p style={{ color: '#94a3b8', fontSize: '1.1rem', marginBottom: '1.5rem' }}>Open to full-time roles, internships, and exciting projects.</p>
 
-          <p className="text-[#94a3b8] text-lg">Open to full-time roles, internships, and exciting projects.</p>
-
-          <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-500/30 bg-green-500/10">
-            <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-            <span className="text-green-400 text-sm font-medium">Currently Available</span>
+          <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '9999px', border: '1px solid rgba(74,222,128,0.4)', background: 'rgba(74,222,128,0.1)', marginBottom: '2.5rem' }}>
+            <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'pulse-dot 2s ease-in-out infinite' }} />
+            <span style={{ color: '#4ade80', fontSize: '14px', fontWeight: 500 }}>Currently Available</span>
           </div>
 
-          <div className="flex flex-wrap justify-center gap-4 pt-4">
-            <motion.button
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              onClick={copyEmail}
-              className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#00d4ff] font-medium hover:bg-[#00d4ff]/20 transition-colors"
-            >
-              <Mail size={20} />
-              vijayrox1955@gmail.com
-              <Copy size={14} className="opacity-60" />
+          <div style={{ display: 'flex', flexWrap: 'wrap', justifyContent: 'center', gap: '1rem' }}>
+            <motion.button whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }} onClick={copyEmail}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 24px', borderRadius: '16px', border: '1px solid rgba(0,212,255,0.35)', background: 'rgba(0,212,255,0.08)', color: '#00d4ff', fontWeight: 600, fontSize: '14px', cursor: 'pointer' }}>
+              ✉ vijayrox1955@gmail.com <span style={{ opacity: 0.6, fontSize: '12px' }}>⧉</span>
             </motion.button>
 
-            <motion.a
-              href="https://github.com/notshakti"
-              target="_blank"
-              rel="noreferrer"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-white/10 bg-white/5 text-white font-medium hover:bg-white/10 transition-colors"
-            >
+            <motion.a href="https://github.com/notshakti" target="_blank" rel="noreferrer" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.15)', background: '#111118', color: '#fff', fontWeight: 600, fontSize: '14px', textDecoration: 'none' }}>
               <GithubIcon size={20} /> GitHub
             </motion.a>
 
-            <motion.a
-              href="https://linkedin.com/in/ShakthiVijay"
-              target="_blank"
-              rel="noreferrer"
-              whileHover={{ scale: 1.05 }}
-              whileTap={{ scale: 0.97 }}
-              className="flex items-center gap-3 px-6 py-4 rounded-2xl border border-[#0077b5]/30 bg-[#0077b5]/10 text-[#0077b5] font-medium hover:bg-[#0077b5]/20 transition-colors"
-            >
+            <motion.a href="https://linkedin.com/in/ShakthiVijay" target="_blank" rel="noreferrer" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+              style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 24px', borderRadius: '16px', border: '1px solid rgba(10,102,194,0.4)', background: 'rgba(10,102,194,0.1)', color: '#0a66c2', fontWeight: 600, fontSize: '14px', textDecoration: 'none' }}>
               <LinkedinIcon size={20} /> LinkedIn
             </motion.a>
           </div>

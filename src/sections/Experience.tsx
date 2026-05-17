@@ -28,50 +28,70 @@ export default function Experience() {
   const inView = useInView(ref, { once: true, amount: 0.2 });
 
   return (
-    <section id="experience" ref={ref} className="py-32 px-6 bg-[#0a0a0a]">
-      <div className="max-w-4xl mx-auto">
+    <section id="experience" ref={ref} style={{ padding: '8rem 1.5rem', background: '#0a0a0a' }}>
+      <div style={{ maxWidth: '900px', margin: '0 auto' }}>
         <motion.div
           initial={{ opacity: 0, y: 40 }}
           animate={inView ? { opacity: 1, y: 0 } : {}}
           transition={{ duration: 0.6 }}
+          style={{ marginBottom: '4rem' }}
         >
-          <h2 className="text-5xl font-black text-white mb-4">Where I&apos;ve <span className="bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] bg-clip-text text-transparent">Worked</span></h2>
-          <div className="w-16 h-1 bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] rounded-full mb-16" />
+          <h2 style={{ fontSize: '3rem', fontWeight: 900, color: '#fff', marginBottom: '0.5rem' }}>
+            Where I&apos;ve <span className="gradient-text">Worked</span>
+          </h2>
+          <div style={{ width: '64px', height: '4px', background: 'linear-gradient(to right, #00d4ff, #7c3aed)', borderRadius: '9999px' }} />
         </motion.div>
 
-        <div className="relative">
-          {/* Animated timeline line */}
+        <div style={{ position: 'relative' }}>
+          {/* Timeline line */}
           <motion.div
-            className="absolute left-4 top-0 bottom-0 w-px bg-gradient-to-b from-[#00d4ff] to-[#7c3aed]"
-            initial={{ scaleY: 0, originY: 0 }}
+            initial={{ scaleY: 0 }}
             animate={inView ? { scaleY: 1 } : {}}
             transition={{ duration: 1.2, ease: 'easeOut', delay: 0.2 }}
+            style={{
+              position: 'absolute',
+              left: '16px',
+              top: 0,
+              bottom: 0,
+              width: '2px',
+              background: 'linear-gradient(to bottom, #00d4ff, #7c3aed)',
+              transformOrigin: 'top',
+            }}
           />
 
-          <div className="space-y-12 pl-16">
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '2rem', paddingLeft: '56px' }}>
             {experiences.map((exp, i) => (
               <motion.div
                 key={exp.company}
                 initial={{ opacity: 0, x: 30 }}
                 animate={inView ? { opacity: 1, x: 0 } : {}}
                 transition={{ duration: 0.6, delay: 0.3 + i * 0.2 }}
-                className="relative"
+                style={{ position: 'relative' }}
               >
-                {/* Dot */}
-                <div className="absolute -left-[49px] top-2 w-3 h-3 rounded-full bg-[#00d4ff] shadow-[0_0_12px_rgba(0,212,255,0.8)]" />
+                {/* Glowing dot */}
+                <div style={{
+                  position: 'absolute',
+                  left: '-48px',
+                  top: '20px',
+                  width: '14px',
+                  height: '14px',
+                  borderRadius: '50%',
+                  background: '#00d4ff',
+                  boxShadow: '0 0 12px rgba(0,212,255,0.8), 0 0 24px rgba(0,212,255,0.4)',
+                }} />
 
-                <div className="p-6 rounded-2xl border border-white/10 bg-white/5">
-                  <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                <div className="card" style={{ padding: '1.5rem' }}>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', alignItems: 'flex-start', justifyContent: 'space-between', gap: '8px', marginBottom: '8px' }}>
                     <div>
-                      <h3 className="text-lg font-bold text-white">{exp.company}</h3>
-                      <p className="text-[#00d4ff] text-sm font-medium">{exp.role}</p>
+                      <h3 style={{ color: '#fff', fontWeight: 700, fontSize: '1.05rem', marginBottom: '2px' }}>{exp.company}</h3>
+                      <p style={{ color: '#00d4ff', fontSize: '0.875rem', fontWeight: 500 }}>{exp.role}</p>
                     </div>
-                    <span className="text-[#94a3b8] text-xs px-3 py-1 rounded-full border border-white/10 bg-white/5 shrink-0">{exp.duration}</span>
+                    <span style={{ padding: '4px 12px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.15)', background: 'rgba(255,255,255,0.05)', color: '#94a3b8', fontSize: '0.75rem', flexShrink: 0 }}>{exp.duration}</span>
                   </div>
-                  <ul className="space-y-1 mt-3">
+                  <ul style={{ display: 'flex', flexDirection: 'column', gap: '6px', marginTop: '12px' }}>
                     {exp.points.map((pt) => (
-                      <li key={pt} className="text-[#94a3b8] text-sm flex gap-2">
-                        <span className="text-[#00d4ff] mt-1 shrink-0">▸</span>
+                      <li key={pt} style={{ color: '#94a3b8', fontSize: '0.875rem', display: 'flex', gap: '8px' }}>
+                        <span style={{ color: '#00d4ff', marginTop: '2px', flexShrink: 0 }}>▸</span>
                         {pt}
                       </li>
                     ))}

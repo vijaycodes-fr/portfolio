@@ -12,10 +12,7 @@ export default function LoadingScreen() {
       const elapsed = Date.now() - start;
       const p = Math.min(100, (elapsed / 1500) * 100);
       setProgress(p);
-      if (p >= 100) {
-        clearInterval(interval);
-        setTimeout(() => setVisible(false), 300);
-      }
+      if (p >= 100) { clearInterval(interval); setTimeout(() => setVisible(false), 300); }
     }, 16);
     return () => clearInterval(interval);
   }, []);
@@ -23,30 +20,16 @@ export default function LoadingScreen() {
   return (
     <AnimatePresence>
       {visible && (
-        <motion.div
-          key="loader"
-          initial={{ opacity: 1 }}
-          exit={{ opacity: 0 }}
-          transition={{ duration: 0.6, ease: 'easeOut' }}
-          className="fixed inset-0 z-[9999] flex flex-col items-center justify-center bg-[#0a0a0a]"
-        >
-          <motion.div
-            initial={{ scale: 0.8, opacity: 0 }}
-            animate={{ scale: 1, opacity: 1 }}
-            transition={{ duration: 0.5 }}
-            className="text-7xl font-black mb-8 bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] bg-clip-text text-transparent"
-          >
+        <motion.div key="loader" initial={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.6 }}
+          style={{ position: 'fixed', inset: 0, zIndex: 9999, display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', background: '#0a0a0a' }}>
+          <motion.div initial={{ scale: 0.8, opacity: 0 }} animate={{ scale: 1, opacity: 1 }} transition={{ duration: 0.5 }}
+            className="gradient-text" style={{ fontSize: '5rem', fontWeight: 900, marginBottom: '2rem' }}>
             SV
           </motion.div>
-          <div className="w-48 h-0.5 bg-white/10 rounded-full overflow-hidden mb-4">
-            <motion.div
-              className="h-full bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] rounded-full"
-              style={{ width: `${progress}%` }}
-            />
+          <div style={{ width: '192px', height: '2px', background: 'rgba(255,255,255,0.1)', borderRadius: '9999px', overflow: 'hidden', marginBottom: '1rem' }}>
+            <div style={{ height: '100%', background: 'linear-gradient(to right,#00d4ff,#7c3aed)', width: `${progress}%`, transition: 'width 0.1s linear', borderRadius: '9999px' }} />
           </div>
-          <p className="text-[#94a3b8] text-sm tracking-widest uppercase">
-            Loading experience...
-          </p>
+          <p style={{ color: '#94a3b8', fontSize: '0.75rem', letterSpacing: '0.2em', textTransform: 'uppercase' }}>Loading experience...</p>
         </motion.div>
       )}
     </AnimatePresence>

@@ -1,5 +1,4 @@
 'use client';
-import dynamic from 'next/dynamic';
 import Navbar from '@/components/ui/Navbar';
 import ScrollProgress from '@/components/ui/ScrollProgress';
 import LoadingScreen from '@/components/ui/LoadingScreen';
@@ -12,6 +11,10 @@ import Achievements from '@/sections/Achievements';
 import Contact from '@/sections/Contact';
 import Footer from '@/sections/Footer';
 
+function Divider({ color = 'rgba(255,255,255,0.08)' }: { color?: string }) {
+  return <div style={{ height: '1px', background: `linear-gradient(to right, transparent, ${color}, transparent)` }} />;
+}
+
 export default function Home() {
   return (
     <>
@@ -20,18 +23,17 @@ export default function Home() {
       <Navbar />
       <main>
         <Hero />
-        {/* Section break */}
-        <div className="h-px bg-gradient-to-r from-transparent via-[#00d4ff]/40 to-transparent" />
+        <Divider color="rgba(0,212,255,0.3)" />
         <About />
-        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <Divider />
         <Skills />
-        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <Divider />
         <Projects />
-        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <Divider />
         <Experience />
-        <div className="h-px bg-gradient-to-r from-transparent via-[#f59e0b]/30 to-transparent" />
+        <Divider color="rgba(245,158,11,0.3)" />
         <Achievements />
-        <div className="h-px bg-gradient-to-r from-transparent via-white/10 to-transparent" />
+        <Divider />
         <Contact />
       </main>
       <Footer />

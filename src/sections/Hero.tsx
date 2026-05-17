@@ -1,7 +1,6 @@
 'use client';
 import { useEffect, useState, useRef } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
-import { Download, ArrowRight } from 'lucide-react';
 import { GithubIcon, LinkedinIcon } from '@/components/ui/Icons';
 import dynamic from 'next/dynamic';
 import { useScrollProgress } from '@/hooks/useScrollProgress';
@@ -9,26 +8,14 @@ import { useScrollProgress } from '@/hooks/useScrollProgress';
 const Scene = dynamic<{ scrollProgress: number }>(() => import('@/components/3d/Scene'), { ssr: false });
 
 const titles = ['Full Stack Developer', 'AI Engineer', 'LLM Builder', 'Oracle Cloud Intern'];
-
-const skills = [
-  'JavaScript', 'TypeScript', 'Python', 'React', 'Next.js', 'Node.js',
-  'Three.js', 'LLM Integration', 'RAG', 'Oracle OCI', 'Docker', 'PostgreSQL',
-  'FastAPI', 'MongoDB', 'Prompt Engineering', 'Gemini', 'GPT-4',
-];
-
-const stats = [
-  { label: 'Projects Built', value: '4' },
-  { label: 'Internships', value: '2' },
-  { label: 'Hackathon Awards', value: '2' },
-  { label: 'B.E CSE', value: '2024–2028' },
-];
+const skills = ['JavaScript','TypeScript','Python','React','Next.js','Node.js','Three.js','LLM Integration','RAG','Oracle OCI','Docker','PostgreSQL','FastAPI','MongoDB','Prompt Engineering','Gemini','GPT-4'];
+const stats = [{ label: 'Projects Built', value: '4+' },{ label: 'Internships', value: '2' },{ label: 'Hackathon Awards', value: '2' },{ label: 'B.E CSE', value: '2024–28' }];
 
 function TypingAnimation() {
   const [index, setIndex] = useState(0);
   const [displayed, setDisplayed] = useState('');
   const [deleting, setDeleting] = useState(false);
   const timerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
-
   useEffect(() => {
     const current = titles[index];
     if (!deleting && displayed.length < current.length) {
@@ -43,190 +30,129 @@ function TypingAnimation() {
     }
     return () => { if (timerRef.current) clearTimeout(timerRef.current); };
   }, [displayed, deleting, index]);
-
-  return (
-    <span className="text-[#00d4ff]">
-      {displayed}
-      <span className="animate-pulse">|</span>
-    </span>
-  );
+  return <span style={{ color: '#00d4ff' }}>{displayed}<span style={{ animation: 'blink 1s step-end infinite' }}>|</span></span>;
 }
 
 export default function Hero() {
   const scrollProgress = useScrollProgress();
-
   const showIntro = scrollProgress < 0.2;
   const showStats = scrollProgress >= 0.2 && scrollProgress < 0.5;
   const showSkills = scrollProgress >= 0.5 && scrollProgress < 0.8;
   const showEnd = scrollProgress >= 0.8;
 
-  const scrollLabel = (() => {
-    if (scrollProgress < 0.15) return '● Sphere';
-    if (scrollProgress < 0.3) return '◎ Exploding';
-    if (scrollProgress < 0.5) return '⟨⟩ DNA Helix';
-    if (scrollProgress < 0.7) return '⊕ Torus Knot';
-    if (scrollProgress < 0.85) return 'AI Letters';
-    return '◉ Vortex';
-  })();
+  const scrollLabel = scrollProgress < 0.15 ? '● Sphere' : scrollProgress < 0.3 ? '◎ Exploding' : scrollProgress < 0.5 ? '⟨⟩ DNA Helix' : scrollProgress < 0.7 ? '⊕ Torus Knot' : scrollProgress < 0.85 ? 'AI Letters' : '◉ Vortex';
 
   return (
-    <section className="relative" style={{ height: '400vh' }}>
-      {/* Sticky container */}
-      <div className="sticky top-0 h-screen overflow-hidden bg-[#0a0a0a]">
-        {/* 3D Canvas */}
-        <div className="absolute inset-0">
+    <section style={{ position: 'relative', height: '400vh' }}>
+      <style>{`
+        @keyframes blink { 50% { opacity: 0; } }
+        @keyframes pulse-dot { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.7;transform:scale(1.3)} }
+      `}</style>
+
+      {/* Sticky viewport */}
+      <div style={{ position: 'sticky', top: 0, height: '100vh', overflow: 'hidden', background: '#0a0a0a' }}>
+
+        {/* 3D Canvas fills background */}
+        <div style={{ position: 'absolute', inset: 0 }}>
           <Scene scrollProgress={scrollProgress} />
         </div>
 
         {/* Left text overlay */}
-        <div className="relative z-10 h-full flex items-center">
-          <div className="max-w-7xl mx-auto px-6 w-full grid grid-cols-1 md:grid-cols-2 gap-8">
-            <div className="flex flex-col justify-center">
-              <AnimatePresence mode="wait">
-                {showIntro && (
-                  <motion.div
-                    key="intro"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="space-y-6"
-                  >
-                    {/* Badge */}
-                    <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-500/30 bg-green-500/10 w-fit">
-                      <span className="w-2 h-2 rounded-full bg-green-400 animate-pulse" />
-                      <span className="text-green-400 text-sm font-medium">Available for Opportunities</span>
-                    </div>
+        <div style={{ position: 'relative', zIndex: 10, height: '100%', display: 'flex', alignItems: 'center', padding: '0 48px' }}>
+          <div style={{ maxWidth: '520px' }}>
+            <AnimatePresence mode="wait">
+              {showIntro && (
+                <motion.div key="intro" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
+                  {/* Badge */}
+                  <div style={{ display: 'inline-flex', alignItems: 'center', gap: '8px', padding: '6px 16px', borderRadius: '9999px', border: '1px solid rgba(74,222,128,0.4)', background: 'rgba(74,222,128,0.1)', marginBottom: '24px' }}>
+                    <span style={{ width: '8px', height: '8px', borderRadius: '50%', background: '#4ade80', display: 'inline-block', animation: 'pulse-dot 2s ease-in-out infinite' }} />
+                    <span style={{ color: '#4ade80', fontSize: '14px', fontWeight: 500 }}>Available for Opportunities</span>
+                  </div>
 
-                    <h1 className="text-5xl md:text-7xl font-black text-white leading-none tracking-tight">
-                      Shakti Vijay A S
-                    </h1>
+                  <h1 style={{ fontSize: 'clamp(2.5rem, 5vw, 4.5rem)', fontWeight: 900, color: '#fff', lineHeight: 1.05, marginBottom: '16px', letterSpacing: '-1px' }}>
+                    Shakti Vijay A S
+                  </h1>
 
-                    <div className="text-2xl md:text-3xl font-bold h-10">
-                      <TypingAnimation />
-                    </div>
+                  <div style={{ fontSize: '1.5rem', fontWeight: 700, height: '2.5rem', marginBottom: '20px' }}>
+                    <TypingAnimation />
+                  </div>
 
-                    <p className="text-[#94a3b8] text-lg max-w-md leading-relaxed">
-                      I build AI-powered products and full-stack systems that ship.
-                      From LLM pipelines to cloud integrations — complex ideas, clean code.
-                    </p>
+                  <p style={{ color: '#94a3b8', fontSize: '1rem', lineHeight: 1.7, marginBottom: '28px', maxWidth: '440px' }}>
+                    I build AI-powered products and full-stack systems that ship. From LLM pipelines to cloud integrations — complex ideas, clean code.
+                  </p>
 
-                    <div className="flex flex-wrap gap-3">
-                      <button
-                        onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })}
-                        className="flex items-center gap-2 px-6 py-3 rounded-full bg-[#00d4ff] text-[#0a0a0a] font-bold hover:bg-[#00d4ff]/90 transition-all hover:scale-105"
-                      >
-                        View My Work <ArrowRight size={16} />
-                      </button>
-                      <a
-                        href="/resume.pdf"
-                        className="flex items-center gap-2 px-6 py-3 rounded-full border border-[#00d4ff]/50 text-[#00d4ff] font-bold hover:bg-[#00d4ff]/10 transition-all"
-                      >
-                        <Download size={16} /> Resume
-                      </a>
-                    </div>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '12px', marginBottom: '24px' }}>
+                    <button onClick={() => document.getElementById('projects')?.scrollIntoView({ behavior: 'smooth' })} style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '9999px', background: '#00d4ff', color: '#0a0a0a', fontWeight: 700, fontSize: '14px', border: 'none', cursor: 'pointer' }}>
+                      View My Work →
+                    </button>
+                    <a href="/resume.pdf" style={{ display: 'flex', alignItems: 'center', gap: '8px', padding: '12px 24px', borderRadius: '9999px', border: '1px solid rgba(0,212,255,0.5)', color: '#00d4ff', fontWeight: 700, fontSize: '14px', textDecoration: 'none' }}>
+                      ↓ Resume
+                    </a>
+                  </div>
 
-                    <div className="flex gap-4">
-                      <a href="https://github.com/notshakti" target="_blank" rel="noreferrer" className="text-[#94a3b8] hover:text-[#00d4ff] transition-colors">
-                        <GithubIcon size={22} />
-                      </a>
-                      <a href="https://linkedin.com/in/ShakthiVijay" target="_blank" rel="noreferrer" className="text-[#94a3b8] hover:text-[#00d4ff] transition-colors">
-                        <LinkedinIcon size={22} />
-                      </a>
-                    </div>
-                  </motion.div>
-                )}
+                  <div style={{ display: 'flex', gap: '16px' }}>
+                    <a href="https://github.com/notshakti" target="_blank" rel="noreferrer" style={{ color: '#94a3b8', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color='#00d4ff')} onMouseLeave={e => (e.currentTarget.style.color='#94a3b8')}><GithubIcon size={22} /></a>
+                    <a href="https://linkedin.com/in/ShakthiVijay" target="_blank" rel="noreferrer" style={{ color: '#94a3b8', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color='#00d4ff')} onMouseLeave={e => (e.currentTarget.style.color='#94a3b8')}><LinkedinIcon size={22} /></a>
+                  </div>
+                </motion.div>
+              )}
 
-                {showStats && (
-                  <motion.div
-                    key="stats"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="space-y-6"
-                  >
-                    <h2 className="text-3xl font-black text-white">By the Numbers</h2>
-                    <div className="grid grid-cols-2 gap-4">
-                      {stats.map((s) => (
-                        <div key={s.label} className="p-4 rounded-2xl border border-white/10 bg-white/5 backdrop-blur-sm">
-                          <div className="text-3xl font-black bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] bg-clip-text text-transparent">
-                            {s.value}
-                          </div>
-                          <div className="text-[#94a3b8] text-sm mt-1">{s.label}</div>
-                        </div>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
+              {showStats && (
+                <motion.div key="stats" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
+                  <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', marginBottom: '24px' }}>By the Numbers</h2>
+                  <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '12px' }}>
+                    {stats.map(s => (
+                      <div key={s.label} style={{ padding: '20px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.12)', background: '#111118' }}>
+                        <div className="gradient-text" style={{ fontSize: '2rem', fontWeight: 900, marginBottom: '4px' }}>{s.value}</div>
+                        <div style={{ color: '#94a3b8', fontSize: '13px' }}>{s.label}</div>
+                      </div>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
 
-                {showSkills && (
-                  <motion.div
-                    key="skills"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="space-y-4"
-                  >
-                    <h2 className="text-3xl font-black text-white">My Arsenal</h2>
-                    <div className="flex flex-wrap gap-2">
-                      {skills.map((s, i) => (
-                        <motion.span
-                          key={s}
-                          initial={{ opacity: 0, scale: 0.8 }}
-                          animate={{ opacity: 1, scale: 1 }}
-                          transition={{ delay: i * 0.03 }}
-                          className="px-3 py-1 rounded-full border border-[#00d4ff]/30 bg-[#00d4ff]/10 text-[#00d4ff] text-sm"
-                        >
-                          {s}
-                        </motion.span>
-                      ))}
-                    </div>
-                  </motion.div>
-                )}
+              {showSkills && (
+                <motion.div key="skills" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
+                  <h2 style={{ fontSize: '2rem', fontWeight: 900, color: '#fff', marginBottom: '20px' }}>My Arsenal</h2>
+                  <div style={{ display: 'flex', flexWrap: 'wrap', gap: '8px' }}>
+                    {skills.map((s, i) => (
+                      <motion.span key={s} initial={{ opacity: 0, scale: 0.8 }} animate={{ opacity: 1, scale: 1 }} transition={{ delay: i * 0.03 }} style={{ padding: '5px 14px', borderRadius: '9999px', border: '1px solid rgba(0,212,255,0.35)', background: 'rgba(0,212,255,0.08)', color: '#00d4ff', fontSize: '13px' }}>
+                        {s}
+                      </motion.span>
+                    ))}
+                  </div>
+                </motion.div>
+              )}
 
-                {showEnd && (
-                  <motion.div
-                    key="end"
-                    initial={{ opacity: 0, y: 30 }}
-                    animate={{ opacity: 1, y: 0 }}
-                    exit={{ opacity: 0, y: -20 }}
-                    transition={{ duration: 0.5 }}
-                    className="text-center"
-                  >
-                    <p className="text-2xl text-[#94a3b8]">Scroll down to explore my work ↓</p>
-                  </motion.div>
-                )}
-              </AnimatePresence>
-            </div>
+              {showEnd && (
+                <motion.div key="end" initial={{ opacity: 0, y: 30 }} animate={{ opacity: 1, y: 0 }} exit={{ opacity: 0, y: -20 }} transition={{ duration: 0.5 }}>
+                  <p style={{ fontSize: '1.5rem', color: '#94a3b8' }}>Scroll down to explore my work ↓</p>
+                </motion.div>
+              )}
+            </AnimatePresence>
           </div>
         </div>
 
-        {/* Scroll phase indicator */}
-        <div className="absolute bottom-6 right-6 z-10 px-3 py-1.5 rounded-full border border-white/10 bg-white/5 backdrop-blur-sm text-xs text-[#94a3b8]">
+        {/* Scroll phase badge */}
+        <div style={{ position: 'absolute', bottom: '24px', right: '24px', zIndex: 10, padding: '6px 14px', borderRadius: '9999px', border: '1px solid rgba(255,255,255,0.12)', background: 'rgba(255,255,255,0.05)', color: '#94a3b8', fontSize: '12px', backdropFilter: 'blur(8px)' }}>
           {scrollLabel}
         </div>
 
         {/* Scroll hint */}
         {scrollProgress < 0.05 && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            className="absolute bottom-6 left-1/2 -translate-x-1/2 z-10 flex flex-col items-center gap-2"
-          >
-            <span className="text-[#94a3b8] text-xs tracking-widest uppercase">Scroll</span>
-            <div className="w-px h-8 bg-gradient-to-b from-[#00d4ff] to-transparent animate-pulse" />
-          </motion.div>
+          <div style={{ position: 'absolute', bottom: '24px', left: '50%', transform: 'translateX(-50%)', zIndex: 10, display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '8px' }}>
+            <span style={{ color: '#94a3b8', fontSize: '11px', letterSpacing: '3px', textTransform: 'uppercase' }}>Scroll</span>
+            <div style={{ width: '1px', height: '32px', background: 'linear-gradient(to bottom, #00d4ff, transparent)' }} />
+          </div>
         )}
       </div>
 
-      {/* Marquee at bottom of hero area */}
-      <div className="absolute bottom-0 left-0 right-0 h-24 flex items-center overflow-hidden bg-[#0a0a0a] border-t border-white/5">
-        <div className="flex animate-marquee whitespace-nowrap">
-          {[...Array(4)].map((_, i) => (
-            <span key={i} className="text-6xl font-black text-transparent mr-16" style={{ WebkitTextStroke: '1px rgba(255,255,255,0.1)' }}>
-              SHAKTI VIJAY &nbsp;&nbsp;&nbsp;
+      {/* Marquee bar */}
+      <div style={{ position: 'absolute', bottom: 0, left: 0, right: 0, height: '80px', display: 'flex', alignItems: 'center', overflow: 'hidden', background: '#0a0a0a', borderTop: '1px solid rgba(255,255,255,0.06)' }}>
+        <div className="animate-marquee" style={{ display: 'flex', whiteSpace: 'nowrap' }}>
+          {[...Array(6)].map((_, i) => (
+            <span key={i} style={{ fontSize: '3.5rem', fontWeight: 900, marginRight: '4rem', color: 'transparent', WebkitTextStroke: '1px rgba(255,255,255,0.08)' }}>
+              SHAKTI VIJAY
             </span>
           ))}
         </div>

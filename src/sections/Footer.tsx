@@ -3,24 +3,16 @@ import { GithubIcon, LinkedinIcon } from '@/components/ui/Icons';
 
 export default function Footer() {
   return (
-    <footer className="py-10 px-6 bg-[#0a0a0a] border-t border-white/5">
-      <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center justify-between gap-4">
-        <span className="font-black bg-gradient-to-r from-[#00d4ff] to-[#7c3aed] bg-clip-text text-transparent text-lg">
-          Shakti Vijay A S
-        </span>
-        <p className="text-[#94a3b8] text-sm text-center">
-          Built with Next.js · Three.js · Tailwind · Framer Motion
-        </p>
-        <div className="flex items-center gap-4">
-          <a href="https://github.com/notshakti" target="_blank" rel="noreferrer" className="text-[#94a3b8] hover:text-[#00d4ff] transition-colors">
-            <GithubIcon size={18} />
-          </a>
-          <a href="https://linkedin.com/in/ShakthiVijay" target="_blank" rel="noreferrer" className="text-[#94a3b8] hover:text-[#00d4ff] transition-colors">
-            <LinkedinIcon size={18} />
-          </a>
+    <footer style={{ padding: '2.5rem 1.5rem', background: '#0a0a0a', borderTop: '1px solid rgba(255,255,255,0.07)' }}>
+      <div style={{ maxWidth: '1280px', margin: '0 auto', display: 'flex', flexWrap: 'wrap', alignItems: 'center', justifyContent: 'space-between', gap: '1rem' }}>
+        <span className="gradient-text" style={{ fontWeight: 900, fontSize: '1.1rem' }}>Shakti Vijay A S</span>
+        <p style={{ color: '#94a3b8', fontSize: '0.875rem', textAlign: 'center' }}>Built with Next.js · Three.js · Tailwind · Framer Motion</p>
+        <div style={{ display: 'flex', gap: '1rem' }}>
+          <a href="https://github.com/notshakti" target="_blank" rel="noreferrer" style={{ color: '#94a3b8', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color='#00d4ff')} onMouseLeave={e => (e.currentTarget.style.color='#94a3b8')}><GithubIcon size={18} /></a>
+          <a href="https://linkedin.com/in/ShakthiVijay" target="_blank" rel="noreferrer" style={{ color: '#94a3b8', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color='#00d4ff')} onMouseLeave={e => (e.currentTarget.style.color='#94a3b8')}><LinkedinIcon size={18} /></a>
         </div>
       </div>
-      <p className="text-center text-[#94a3b8] text-xs mt-4">© 2025 · Made in Chennai</p>
+      <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', marginTop: '1rem' }}>© 2025 · Made in Chennai</p>
     </footer>
   );
 }
