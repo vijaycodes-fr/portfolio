@@ -3,58 +3,65 @@ import { Suspense, useEffect, useRef, useState } from 'react';
 import { Canvas } from '@react-three/fiber';
 import { AdaptiveDpr } from '@react-three/drei';
 import ParticleBrain from './ParticleBrain';
-import { useMousePosition } from '@/hooks/useMousePosition';
 
 interface Props {
-  scrollProgress: number;
+  scrollRef: React.MutableRefObject<number>;
 }
 
 function BloomWrapper({ children }: { children: React.ReactNode }) {
-  const [BloomComponents, setBloomComponents] = useState<{
-    EffectComposer: React.ComponentType<{ children: React.ReactNode }>;
-    Bloom: React.ComponentType<{ luminanceThreshold: number; luminanceSmoothing: number; intensity: number }>;
-  } | null>(null);
+  const [Bloom, setBloom] = useState<React.ComponentType<{
+    luminanceThreshold: number; luminanceSmoothing: number; intensity: number;
+  }> | null>(null);
+  const [Composer, setComposer] = useState<React.ComponentType<{ children: React.ReactNode }> | null>(null);
 
   useEffect(() => {
     import('@react-three/postprocessing').then((mod) => {
-      setBloomComponents({
-        EffectComposer: mod.EffectComposer as React.ComponentType<{ children: React.ReactNode }>,
-        Bloom: mod.Bloom as React.ComponentType<{ luminanceThreshold: number; luminanceSmoothing: number; intensity: number }>,
-      });
-    }).catch(() => {
-      // Safari fallback - bloom not supported
-    });
+      setComposer(() => mod.EffectComposer as React.ComponentType<{ children: React.ReactNode }>);
+      setBloom(() => mod.Bloom as React.ComponentType<{ luminanceThreshold: number; luminanceSmoothing: number; intensity: number }>);
+    }).catch(() => {});
   }, []);
 
-  if (!BloomComponents) return <>{children}</>;
-  const { EffectComposer, Bloom } = BloomComponents;
+  if (!Bloom || !Composer) return <>{children}</>;
   return (
     <>
       {children}
-      <EffectComposer>
-        <Bloom luminanceThreshold={0.1} luminanceSmoothing={0.4} intensity={1.5} />
-      </EffectComposer>
+      <Composer>
+        <Bloom luminanceThreshold={0.2} luminanceSmoothing={0.5} intensity={1.2} />
+      </Composer>
     </>
   );
 }
 
-export default function Scene({ scrollProgress }: Props) {
-  const mouse = useMousePosition();
+export default function Scene({ scrollRef }: Props) {
+  const mouseRef = useRef({ x: 0, y: 0 });
   const [isMobile, setIsMobile] = useState(false);
 
   useEffect(() => {
-    setIsMobile(window.innerWidth < 768);
-    const handler = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener('resize', handler, { passive: true });
-    return () => window.removeEventListener('resize', handler);
+    const check = () => setIsMobile(window.innerWidth < 768);
+    check();
+    window.addEventListener('resize', check, { passive: true });
+    return () => window.removeEventListener('resize', check);
   }, []);
+
+  useEffect(() => {
+    if (isMobile) return;
+    const handleMove = (e: MouseEvent) => {
+      mouseRef.current = {
+        x: (e.clientX / window.innerWidth) * 2 - 1,
+        y: -(e.clientY / window.innerHeight) * 2 + 1,
+      };
+    };
+    window.addEventListener('mousemove', handleMove, { passive: true });
+    return () => window.removeEventListener('mousemove', handleMove);
+  }, [isMobile]);
 
   return (
     <Canvas
       camera={{ position: [0, 0, 4], fov: 60 }}
-      gl={{ alpha: true, antialias: !isMobile }}
+      gl={{ alpha: true, antialias: false, powerPreference: 'high-performance' }}
       style={{ background: 'transparent' }}
-      dpr={[1, isMobile ? 1 : 2]}
+      dpr={[1, isMobile ? 1 : 1.5]}
+      frameloop="always"
     >
       <AdaptiveDpr pixelated />
       <ambientLight intensity={0.3} color="#ffffff" />
@@ -62,20 +69,10 @@ export default function Scene({ scrollProgress }: Props) {
       <pointLight position={[3, 0, 2]} intensity={2} color="#7c3aed" />
       <Suspense fallback={null}>
         {isMobile ? (
-          <ParticleBrain
-            scrollProgress={scrollProgress}
-            mouseX={0}
-            mouseY={0}
-            isMobile={true}
-          />
+          <ParticleBrain scrollRef={scrollRef} mouseRef={mouseRef} isMobile={true} />
         ) : (
           <BloomWrapper>
-            <ParticleBrain
-              scrollProgress={scrollProgress}
-              mouseX={mouse.x}
-              mouseY={mouse.y}
-              isMobile={false}
-            />
+            <ParticleBrain scrollRef={scrollRef} mouseRef={mouseRef} isMobile={false} />
           </BloomWrapper>
         )}
       </Suspense>

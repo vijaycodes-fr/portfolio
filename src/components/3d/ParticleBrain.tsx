@@ -13,9 +13,8 @@ import {
 import { SCROLL_PHASES } from '@/lib/constants';
 
 interface Props {
-  scrollProgress: number;
-  mouseX: number;
-  mouseY: number;
+  scrollRef: React.MutableRefObject<number>;
+  mouseRef: React.MutableRefObject<{ x: number; y: number }>;
   isMobile: boolean;
 }
 
@@ -23,18 +22,21 @@ function easeInOut(t: number): number {
   return t < 0.5 ? 2 * t * t : -1 + (4 - 2 * t) * t;
 }
 
-function lerpColor(c1: THREE.Color, c2: THREE.Color, t: number): THREE.Color {
-  return new THREE.Color().lerpColors(c1, c2, Math.max(0, Math.min(1, t)));
-}
+const MAX_LINES = 500;
+// Sample every Nth particle for line connections — keeps the nested loop cheap
+const LINE_STEP_DESKTOP = 12;
+const LINE_STEP_MOBILE = 20;
+// Only recompute lines every N frames
+const LINE_FRAME_SKIP = 4;
 
-export default function ParticleBrain({ scrollProgress, mouseX, mouseY, isMobile }: Props) {
-  const count = isMobile ? 800 : 2000;
-  const pointsRef = useRef<THREE.Points>(null);
-  const linesRef = useRef<THREE.LineSegments>(null);
+export default function ParticleBrain({ scrollRef, mouseRef, isMobile }: Props) {
+  const count = isMobile ? 600 : 1500;
   const groupRef = useRef<THREE.Group>(null);
+  const frameRef = useRef(0);
 
   const cyan = useMemo(() => new THREE.Color('#00d4ff'), []);
   const purple = useMemo(() => new THREE.Color('#7c3aed'), []);
+  const colorWork = useMemo(() => new THREE.Color(), []);
 
   const targets = useMemo(() => ({
     sphere: getSpherePositions(count),
@@ -49,26 +51,29 @@ export default function ParticleBrain({ scrollProgress, mouseX, mouseY, isMobile
 
   const geometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
-    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(targets.sphere), 3));
+    const buf = new THREE.BufferAttribute(new Float32Array(targets.sphere), 3);
+    buf.setUsage(THREE.DynamicDrawUsage);
+    geo.setAttribute('position', buf);
     return geo;
   }, [targets.sphere]);
 
   const lineGeometry = useMemo(() => {
     const geo = new THREE.BufferGeometry();
-    const maxLines = Math.min(count * 2, 4000);
-    geo.setAttribute('position', new THREE.BufferAttribute(new Float32Array(maxLines * 6), 3));
+    const buf = new THREE.BufferAttribute(new Float32Array(MAX_LINES * 6), 3);
+    buf.setUsage(THREE.DynamicDrawUsage);
+    geo.setAttribute('position', buf);
     return geo;
-  }, [count]);
+  }, []);
 
   const material = useMemo(() => new THREE.PointsMaterial({
-    size: 0.02,
+    size: isMobile ? 0.025 : 0.02,
     color: '#00d4ff',
     transparent: true,
     opacity: 0.9,
     sizeAttenuation: true,
     blending: THREE.AdditiveBlending,
     depthWrite: false,
-  }), []);
+  }), [isMobile]);
 
   const lineMaterial = useMemo(() => new THREE.LineBasicMaterial({
     color: '#00d4ff',
@@ -88,101 +93,99 @@ export default function ParticleBrain({ scrollProgress, mouseX, mouseY, isMobile
   }, [geometry, lineGeometry, material, lineMaterial]);
 
   useFrame((_, delta) => {
-    if (!pointsRef.current || !groupRef.current) return;
+    if (!groupRef.current) return;
 
-    const sp = scrollProgress;
+    // Cap delta to avoid spiral-of-death on tab switch
+    const dt = Math.min(delta, 0.05);
+    const sp = scrollRef.current;
+
+    // --- Determine morph targets ---
     let fromPos: Float32Array;
     let toPos: Float32Array;
     let localT: number;
 
     if (sp < SCROLL_PHASES.EXPLODE) {
-      fromPos = targets.sphere;
-      toPos = targets.sphere;
-      localT = 0;
+      fromPos = targets.sphere; toPos = targets.sphere; localT = 0;
     } else if (sp < SCROLL_PHASES.HELIX) {
-      fromPos = targets.sphere;
-      toPos = targets.explode;
+      fromPos = targets.sphere; toPos = targets.explode;
       localT = easeInOut((sp - SCROLL_PHASES.EXPLODE) / (SCROLL_PHASES.HELIX - SCROLL_PHASES.EXPLODE));
     } else if (sp < SCROLL_PHASES.TORUS) {
-      fromPos = targets.explode;
-      toPos = targets.helix;
+      fromPos = targets.explode; toPos = targets.helix;
       localT = easeInOut((sp - SCROLL_PHASES.HELIX) / (SCROLL_PHASES.TORUS - SCROLL_PHASES.HELIX));
     } else if (sp < SCROLL_PHASES.LETTERS) {
-      fromPos = targets.helix;
-      toPos = targets.torus;
+      fromPos = targets.helix; toPos = targets.torus;
       localT = easeInOut((sp - SCROLL_PHASES.TORUS) / (SCROLL_PHASES.LETTERS - SCROLL_PHASES.TORUS));
     } else if (sp < SCROLL_PHASES.VORTEX) {
-      fromPos = targets.torus;
-      toPos = targets.letters;
+      fromPos = targets.torus; toPos = targets.letters;
       localT = easeInOut((sp - SCROLL_PHASES.LETTERS) / (SCROLL_PHASES.VORTEX - SCROLL_PHASES.LETTERS));
     } else {
-      fromPos = targets.letters;
-      toPos = targets.vortex;
+      fromPos = targets.letters; toPos = targets.vortex;
       localT = easeInOut((sp - SCROLL_PHASES.VORTEX) / (1 - SCROLL_PHASES.VORTEX));
     }
 
-    const lerpSpeed = Math.min(delta * 8, 1);
+    // --- In-place lerp particles ---
+    const lerpSpeed = Math.min(dt * 7, 1);
     const pos = currentPositions.current;
     for (let i = 0; i < count * 3; i++) {
-      const target = fromPos[i] + (toPos[i] - fromPos[i]) * localT;
-      pos[i] += (target - pos[i]) * lerpSpeed;
+      pos[i] += (fromPos[i] + (toPos[i] - fromPos[i]) * localT - pos[i]) * lerpSpeed;
     }
 
     const posAttr = geometry.getAttribute('position') as THREE.BufferAttribute;
     posAttr.set(pos);
     posAttr.needsUpdate = true;
 
-    // Color shift
+    // --- Color shift (reuse colorWork, no allocation) ---
     let colorT = 0;
-    if (sp > 0.3 && sp < 0.7) {
-      colorT = (sp - 0.3) / 0.4;
-    } else if (sp >= 0.7) {
-      colorT = 1 - (sp - 0.7) / 0.3;
-    }
-    const color = lerpColor(cyan, purple, colorT);
-    material.color = color;
-    lineMaterial.color = color;
+    if (sp > 0.3 && sp < 0.7) colorT = (sp - 0.3) / 0.4;
+    else if (sp >= 0.7) colorT = 1 - (sp - 0.7) / 0.3;
+    colorWork.lerpColors(cyan, purple, colorT);
+    material.color.copy(colorWork);
+    lineMaterial.color.copy(colorWork);
 
-    // Update line connections (every other frame for perf)
-    const linePos = lineGeometry.getAttribute('position') as THREE.BufferAttribute;
-    const lineArr = linePos.array as Float32Array;
-    let lineIdx = 0;
-    const maxLines = Math.floor(lineArr.length / 6);
-    const step = isMobile ? 4 : 2;
-    const distSq = 0.64; // 0.8^2
+    // --- Line connections: only every LINE_FRAME_SKIP frames ---
+    frameRef.current++;
+    if (frameRef.current % LINE_FRAME_SKIP === 0) {
+      const linePos = lineGeometry.getAttribute('position') as THREE.BufferAttribute;
+      const lineArr = linePos.array as Float32Array;
+      let lineIdx = 0;
+      const step = isMobile ? LINE_STEP_MOBILE : LINE_STEP_DESKTOP;
+      const distSq = 0.64; // 0.8²
 
-    for (let i = 0; i < count && lineIdx < maxLines; i += step) {
-      for (let j = i + 1; j < count && lineIdx < maxLines; j += step) {
-        const dx = pos[i * 3] - pos[j * 3];
-        const dy = pos[i * 3 + 1] - pos[j * 3 + 1];
-        const dz = pos[i * 3 + 2] - pos[j * 3 + 2];
-        if (dx * dx + dy * dy + dz * dz < distSq) {
-          lineArr[lineIdx * 6] = pos[i * 3];
-          lineArr[lineIdx * 6 + 1] = pos[i * 3 + 1];
-          lineArr[lineIdx * 6 + 2] = pos[i * 3 + 2];
-          lineArr[lineIdx * 6 + 3] = pos[j * 3];
-          lineArr[lineIdx * 6 + 4] = pos[j * 3 + 1];
-          lineArr[lineIdx * 6 + 5] = pos[j * 3 + 2];
-          lineIdx++;
+      outer: for (let i = 0; i < count; i += step) {
+        for (let j = i + step; j < count; j += step) {
+          const ix = i * 3, jx = j * 3;
+          const dx = pos[ix] - pos[jx];
+          const dy = pos[ix + 1] - pos[jx + 1];
+          const dz = pos[ix + 2] - pos[jx + 2];
+          if (dx * dx + dy * dy + dz * dz < distSq) {
+            const li = lineIdx * 6;
+            lineArr[li]     = pos[ix];
+            lineArr[li + 1] = pos[ix + 1];
+            lineArr[li + 2] = pos[ix + 2];
+            lineArr[li + 3] = pos[jx];
+            lineArr[li + 4] = pos[jx + 1];
+            lineArr[li + 5] = pos[jx + 2];
+            if (++lineIdx >= MAX_LINES) break outer;
+          }
         }
       }
+      linePos.needsUpdate = true;
     }
-    linePos.needsUpdate = true;
 
-    // Slow Y rotation
-    if (groupRef.current) {
-      groupRef.current.rotation.y += delta * 0.15;
-      if (!isMobile) {
-        groupRef.current.position.x += (mouseX * 0.3 - groupRef.current.position.x) * 0.05;
-        groupRef.current.position.y += (mouseY * 0.3 - groupRef.current.position.y) * 0.05;
-      }
+    // --- Group rotation + mouse parallax ---
+    groupRef.current.rotation.y += dt * 0.15;
+    if (!isMobile) {
+      const mx = mouseRef.current.x;
+      const my = mouseRef.current.y;
+      groupRef.current.position.x += (mx * 0.3 - groupRef.current.position.x) * 0.05;
+      groupRef.current.position.y += (my * 0.3 - groupRef.current.position.y) * 0.05;
     }
   });
 
   return (
     <group ref={groupRef}>
-      <points ref={pointsRef} geometry={geometry} material={material} />
-      <lineSegments ref={linesRef} geometry={lineGeometry} material={lineMaterial} />
+      <points geometry={geometry} material={material} />
+      <lineSegments geometry={lineGeometry} material={lineMaterial} />
     </group>
   );
 }
