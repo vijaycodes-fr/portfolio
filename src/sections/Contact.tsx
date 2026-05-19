@@ -38,7 +38,7 @@ export default function Contact() {
               <GithubIcon size={20} /> GitHub
             </motion.a>
 
-            <motion.a href="https://linkedin.com/in/ShakthiVijay" target="_blank" rel="noreferrer" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+            <motion.a href="https://www.linkedin.com/in/shaktidev/" target="_blank" rel="noreferrer" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
               style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 24px', borderRadius: '16px', border: '1px solid rgba(10,102,194,0.4)', background: 'rgba(10,102,194,0.1)', color: '#0a66c2', fontWeight: 600, fontSize: '14px', textDecoration: 'none' }}>
               <LinkedinIcon size={20} /> LinkedIn
             </motion.a>

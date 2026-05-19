@@ -122,7 +122,7 @@ export default function Hero() {
                   </div>
                   <div style={{ display: 'flex', gap: '16px' }}>
                     <a href="https://github.com/vijaycodes-fr" target="_blank" rel="noreferrer" style={{ color: '#94a3b8' }} onMouseEnter={e => (e.currentTarget.style.color='#00d4ff')} onMouseLeave={e => (e.currentTarget.style.color='#94a3b8')}><GithubIcon size={22} /></a>
-                    <a href="https://linkedin.com/in/ShakthiVijay" target="_blank" rel="noreferrer" style={{ color: '#94a3b8' }} onMouseEnter={e => (e.currentTarget.style.color='#00d4ff')} onMouseLeave={e => (e.currentTarget.style.color='#94a3b8')}><LinkedinIcon size={22} /></a>
+                    <a href="https://www.linkedin.com/in/shaktidev/" target="_blank" rel="noreferrer" style={{ color: '#94a3b8' }} onMouseEnter={e => (e.currentTarget.style.color='#00d4ff')} onMouseLeave={e => (e.currentTarget.style.color='#94a3b8')}><LinkedinIcon size={22} /></a>
                   </div>
                 </motion.div>
               )}

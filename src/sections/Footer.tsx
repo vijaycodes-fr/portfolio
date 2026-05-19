@@ -9,7 +9,7 @@ export default function Footer() {
         <p style={{ color: '#94a3b8', fontSize: '0.875rem', textAlign: 'center' }}>Built with Next.js · Three.js · Tailwind · Framer Motion</p>
         <div style={{ display: 'flex', gap: '1rem' }}>
           <a href="https://github.com/vijaycodes-fr" target="_blank" rel="noreferrer" style={{ color: '#94a3b8', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color='#00d4ff')} onMouseLeave={e => (e.currentTarget.style.color='#94a3b8')}><GithubIcon size={18} /></a>
-          <a href="https://linkedin.com/in/ShakthiVijay" target="_blank" rel="noreferrer" style={{ color: '#94a3b8', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color='#00d4ff')} onMouseLeave={e => (e.currentTarget.style.color='#94a3b8')}><LinkedinIcon size={18} /></a>
+          <a href="https://www.linkedin.com/in/shaktidev/" target="_blank" rel="noreferrer" style={{ color: '#94a3b8', transition: 'color 0.2s' }} onMouseEnter={e => (e.currentTarget.style.color='#00d4ff')} onMouseLeave={e => (e.currentTarget.style.color='#94a3b8')}><LinkedinIcon size={18} /></a>
         </div>
       </div>
       <p style={{ textAlign: 'center', color: '#94a3b8', fontSize: '0.75rem', marginTop: '1rem' }}>© 2025 · Made in Chennai</p>
