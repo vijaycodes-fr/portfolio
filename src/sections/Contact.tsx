@@ -33,7 +33,7 @@ export default function Contact() {
               ✉ vijayrox1955@gmail.com <span style={{ opacity: 0.6, fontSize: '12px' }}>⧉</span>
             </motion.button>
 
-            <motion.a href="https://github.com/notshakti" target="_blank" rel="noreferrer" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
+            <motion.a href="https://github.com/vijaycodes-fr" target="_blank" rel="noreferrer" whileHover={{ scale: 1.05 }} whileTap={{ scale: 0.97 }}
               style={{ display: 'flex', alignItems: 'center', gap: '10px', padding: '14px 24px', borderRadius: '16px', border: '1px solid rgba(255,255,255,0.15)', background: '#111118', color: '#fff', fontWeight: 600, fontSize: '14px', textDecoration: 'none' }}>
               <GithubIcon size={20} /> GitHub
             </motion.a>

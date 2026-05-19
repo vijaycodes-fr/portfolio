@@ -16,7 +16,7 @@ export const PERSONAL = {
   title: 'Full Stack Developer & AI Engineer',
   email: 'vijayrox1955@gmail.com',
   linkedin: 'https://linkedin.com/in/ShakthiVijay',
-  github: 'https://github.com/notshakti',
+  github: 'https://github.com/vijaycodes-fr',
   location: 'Chennai, India',
 };
 
